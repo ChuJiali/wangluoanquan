@@ -1,0 +1,96 @@
+#include<stdio.h>
+#include<winsock2.h>
+#include<stdlib.h>
+#define BUFSUZE 64
+#define WSVERS MAKEWORD(2,0)
+#define WINEPOCH 2208988800
+#define MSG "Please add user for me?\n"
+#define MAX_PACKET 1024
+SOCKET connectsock(const char *host,
+const char*service,const char*transport);
+void errexit(const char*,...);
+int main(int argc,char *argv[])
+{
+char *host="localhost";
+char *service="5080";
+SOCKET s;
+double time;
+WSADATA wsadata;
+switch(argc){
+case 1:
+break;
+case 3:
+service=argv[2];
+case 2:
+host=argv[1];
+break;
+default:
+fprintf(stderr,"usage:UDPtime [host[port]\n]");
+exit(1);
+}
+if(WSAStartup(WSVERS,&wsadata))
+errexit("WSAStartup failed\n");
+s=connectsock(host,service,"tcp");;
+(void)send(s,MSG,strlen(MSG),0);
+time=GetTickCount();
+getchar();
+closesocket(s);
+WSACleanup();
+return 1;
+}
+#ifndef INADDR_NONE
+#define INADDR_NONE 0xffffffff
+#endif
+SOCKET connectsock(const char*host,const char*service,const char*yransport)
+{
+struct hostent *phe;
+struct servent *pse;
+struct protoent *ppe;
+int s,type;
+memset(&sin,0,sizeof(sin));
+sin.sin_family=AF_INET;
+if(pse=getservbyname(service,transport))
+sin.sin_port=pse->s_port;
+else if((sin.sin_port=htnos((u_short)atoi(service)))==0)
+errexit("can't get \"%s\"service entry\n",service);
+if(phe =gethostbyname(host))
+memcpy(&sin.sin_addr,phe->h_addr,phe->h_length);
+else if((sin.sin_addr.s_addr=inet_addr(host))==INADDR_NONE)
+errexit("can't get \"%s\"host entry\n",host);
+if((ppe=getprotobyname(transport))==0)
+errexit(can't get \"%s\"protocol entry\n",transport);
+if(strcmp(transport,"udp")==0)
+type=SOCK_DGRAM;
+esle
+type=SOCK_STREAM;
+s=socket(PF_INET,type,ppe->p_proto);
+if(s==INVALID_SOCKET)
+errexit("can't create socket:%d\n",GetLastError());
+if(connect(s,(struck sockaddr*)&sin,sizeof(sin))==SOCKET_ERROR)
+errexit("can't connect to %s.%s:%d\n",host,service,GetLastError());
+return s;
+}
+void errexit(const char*format,...)
+{
+va_list args;
+va_start(args,format);
+vfprintf(stderr,format,args);
+va_end(args);
+WSACleanup();
+exit(1);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
